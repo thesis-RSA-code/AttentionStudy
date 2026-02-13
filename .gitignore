@@ -2,4 +2,7 @@ outputs/
 __pycache__/
 
 torch_nested_mha_tutorial.py
-archive/    
+archive/   
+
+launch/run_container_benchmark.sh
+launch/submit_container_benchmark.sh

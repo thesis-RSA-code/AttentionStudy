@@ -15,7 +15,7 @@ print(f"Importing torch_geometric.utils...")
 from torch_geometric.utils import to_dense_batch
 
 print(f"Importing attn.AttentionLayer...")
-from attn import AttentionLayer
+from layers.attn import AttentionLayer
 
 print(f"Importing torch_nested_mha_tutorial...")
 from torch_nested_mha_tutorial import MultiHeadAttention

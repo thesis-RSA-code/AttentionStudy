@@ -152,7 +152,7 @@ def create_graph_batch(num_events, avg_pmts_per_event, hidden_channels, num_edge
     batch = Batch.from_data_list(data_list)
     return batch
 
-def main(num_events, avg_pmts_per_event, hidden_channels, num_heads, num_edges_per_node, device, db_precision, compiling, compare_outputs):
+def main(num_events, avg_pmts_per_event, hidden_channels, num_heads, num_edges_per_node, device, db_precision, compiling, compare_outputs, save_folder):
     print("Environment variables:")
     print(f"  TRITON_CACHE_DIR: {os.getenv('TRITON_CACHE_DIR')}")
     print(f"  TORCHINDUCTOR_CACHE_DIR: {os.getenv('TORCHINDUCTOR_CACHE_DIR')}")
@@ -306,7 +306,8 @@ def main(num_events, avg_pmts_per_event, hidden_channels, num_heads, num_edges_p
     # Save results
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     filename = f"benchmark_{timestamp}_bs{num_events}_hc{hidden_channels}_nh{num_heads}_db{db_precision}_comp{compiling}.npz"
-    save_benchmark_results(filename, config, results, timestamp)
+    full_save_path = os.path.join(save_folder, filename)
+    save_benchmark_results(full_save_path, config, results, timestamp)
 
 
 def is_running_in_container():
@@ -366,6 +367,7 @@ def save_benchmark_results(filepath, config, results, timestamp=None):
         save_data[prefix + 'peak_memory_gb'] = model_results['peak_memory'] / 1e9
     
     # Save to file
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
     np.savez(filepath, **save_data)
     print(f"\n✓ Benchmark results saved to: {filepath}")
 
@@ -392,22 +394,23 @@ if __name__ == "__main__":
     print(f"Importing torch_geometric.data...")
     from torch_geometric.data import Batch, Data
     print(f"Importing AttentionLayers...")
-    from attn import AttentionLayer, AttentionLayerFused
+    from layers.attn import AttentionLayer, AttentionLayerFused
     print(40 * "=" + " Done importing modules. " + 40 * "=")
 
 
     # ============= Configuration =============
     num_events         = 50  # batch size
-    avg_pmts_per_event = 5000  # moyenne de PMTs par événement
+    avg_pmts_per_event = 100  # moyenne de PMTs par événement
     hidden_channels    = 50
     num_heads          = 5
     num_edges_per_node = 5  # nombre moyen d'arêtes par PMT
-    device             = "cuda"
+    device             = "cuda:0"
     db_precision       = True
-    compiling          = True
+    compiling          = False
     compare_outputs    = False
+    save_folder        = "outputs"
     # ============= Seed Management =============
     seed = 42
     set_seeds(seed)
 
-    main(num_events, avg_pmts_per_event, hidden_channels, num_heads, num_edges_per_node, device, db_precision, compiling, compare_outputs)
+    main(num_events, avg_pmts_per_event, hidden_channels, num_heads, num_edges_per_node, device, db_precision, compiling, compare_outputs, save_folder)

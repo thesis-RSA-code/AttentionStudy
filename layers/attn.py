@@ -9,7 +9,7 @@ import torch.nn.functional as F
 print("Importing torch_geometric.utils.softmax...")
 from torch_geometric.utils import softmax
 
-from activation_functions import get_activation
+from utils.activation_functions import get_activation
 
 
 class AttentionLayer(nn.Module):
